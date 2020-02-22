@@ -1,1 +1,11 @@
-<manifest package="com.lomovskiy.imagepicker" />
+<manifest package="com.lomovskiy.imagepicker">
+    
+    <application>
+        
+        <provider
+            authorities=""
+            name=""
+        
+    </application>
+    
+</manifest>

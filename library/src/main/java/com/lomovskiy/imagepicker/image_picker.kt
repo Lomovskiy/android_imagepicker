@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.MediaStore
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import java.io.File
 import java.text.SimpleDateFormat
@@ -23,8 +25,16 @@ class ImagePicker(
 
     private var tempPhotoFile: File? = null
 
-    fun pickFromCamera() {
-
+    fun pickFromCamera(activity: Activity) {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (intent.resolveActivity(activity.packageManager) != null) {
+            tempPhotoFile = getNewTempFile(activity)
+            val photoUri = FileProvider.getUriForFile(activity, App.authority, tempPhotoFile!!)
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            fragment.startActivityForResult(intent, RC_FM_CAMERA)
+        } else {
+            throw NullPointerException()
+        }
     }
 
     fun pickFromGallery(fragment: Fragment) {
@@ -124,3 +134,5 @@ class ImagePicker(
 enum class PickType {
     CAMERA, GALLERY
 }
+
+class ImagePickerFileProvider : FileProvider()
