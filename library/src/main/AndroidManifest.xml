@@ -1,10 +1,17 @@
-<manifest package="com.lomovskiy.imagepicker">
+<manifest package="com.lomovskiy.imagepicker"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     
     <application>
-        
+
         <provider
-            authorities=""
-            name=""
+            android:name=".ImagePickerFileProvider"
+            android:authorities="${applicationId}.imagepicker.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider_paths" />
+        </provider>
         
     </application>
     

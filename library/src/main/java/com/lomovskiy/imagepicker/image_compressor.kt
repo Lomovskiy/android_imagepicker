@@ -8,9 +8,9 @@ import java.io.File
 
 class ImageCompressor(
 
-    private val maxWidth: Int,
-    private val maxHeight: Int,
-    private val quality: Int,
+    private val requiredWidth: Int,
+    private val requiredHeight: Int,
+    private val requiredQuality: Int,
     private val compressFormat: Bitmap.CompressFormat
 
 ) {
@@ -18,8 +18,8 @@ class ImageCompressor(
     fun compress(photoFile: File, destinationFile: File) {
         val fos = destinationFile.outputStream()
         try {
-            decodeScaledBitmapFromFile(photoFile, maxHeight, maxWidth)
-                .compress(compressFormat, quality, fos)
+            decodeScaledBitmapFromFile(photoFile, requiredHeight, requiredWidth)
+                .compress(compressFormat, requiredQuality, fos)
         } finally {
             fos.flush()
             fos.close()

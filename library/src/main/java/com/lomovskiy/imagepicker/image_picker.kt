@@ -8,32 +8,49 @@ import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import java.io.File
+import java.lang.UnsupportedOperationException
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ImagePicker(
 
-    private val destinationFolder: File,
+    private val context: Context,
+    private val destinationPath: String,
     private val compressor: ImageCompressor?
 
 ) {
 
     private val rcGallery = 997
     private val rcCamera = 991
+    private val authority: String = "${context.packageName}.imagepicker.fileprovider"
 
     private val dateTimeFormatter = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
 
     private var tempPhotoFile: File? = null
 
+    @Throws(UnsupportedOperationException::class)
+    fun pickFromCamera(fragment: Fragment) {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (intent.resolveActivity(context.packageManager) != null) {
+            tempPhotoFile = getNewTempFile()
+            val photoUri = FileProvider.getUriForFile(context, authority, tempPhotoFile!!)
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            fragment.startActivityForResult(intent, rcCamera)
+        } else {
+            throw UnsupportedOperationException("Activity for doing this action is not find")
+        }
+    }
+
+    @Throws(UnsupportedOperationException::class)
     fun pickFromCamera(activity: Activity) {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (intent.resolveActivity(activity.packageManager) != null) {
-            tempPhotoFile = getNewTempFile(activity)
-            val photoUri = FileProvider.getUriForFile(activity, App.authority, tempPhotoFile!!)
+        if (intent.resolveActivity(context.packageManager) != null) {
+            tempPhotoFile = getNewTempFile()
+            val photoUri = FileProvider.getUriForFile(activity, authority, tempPhotoFile!!)
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-            fragment.startActivityForResult(intent, RC_FM_CAMERA)
+            activity.startActivityForResult(intent, rcCamera)
         } else {
-            throw NullPointerException()
+            throw UnsupportedOperationException("Activity for doing this action is not find")
         }
     }
 
@@ -51,20 +68,19 @@ class ImagePicker(
                                context: Context,
                                callback: Callback) {
         if (requestCode == rcGallery) {
-            handleGalleryResult(resultCode, data, context, callback)
+            handleGalleryResult(resultCode, data, callback)
         } else if (requestCode == rcCamera) {
-            handleCameraResult(resultCode, context, callback)
+            handleCameraResult(resultCode, callback)
         }
     }
 
     private fun handleGalleryResult(resultCode: Int,
                                     data: Intent?,
-                                    context: Context,
                                     callback: Callback) {
         when (resultCode) {
             Activity.RESULT_OK -> {
                 try {
-                    tempPhotoFile = getNewTempFile(context)
+                    tempPhotoFile = getNewTempFile()
                     val uri: Uri = data!!.data!!
                     tempPhotoFile!!.writeBytes(context.contentResolver.openInputStream(uri)!!.readBytes())
                     val photoFile: File = getNewPhotoFile()
@@ -74,18 +90,16 @@ class ImagePicker(
                         compressor.compress(tempPhotoFile!!, photoFile)
                     }
                     tempPhotoFile!!.delete()
-                    callback.onSuccess(photoFile, PickType.GALLERY)
+                    callback.onSuccess(photoFile, PickType.Gallery)
                 } catch (e: Exception) {
-                    callback.onFailure(e, PickType.GALLERY)
+                    callback.onFailure(e, PickType.Gallery)
                 }
             }
-            Activity.RESULT_CANCELED -> callback.onCancel(PickType.GALLERY)
+            Activity.RESULT_CANCELED -> callback.onCancel(PickType.Gallery)
         }
     }
 
-    private fun handleCameraResult(resultCode: Int,
-                                   context: Context,
-                                   callback: Callback) {
+    private fun handleCameraResult(resultCode: Int, callback: Callback) {
         when (resultCode) {
             Activity.RESULT_OK -> {
                 try {
@@ -96,12 +110,12 @@ class ImagePicker(
                         compressor.compress(tempPhotoFile!!, photoFile)
                     }
                     tempPhotoFile!!.delete()
-                    callback.onSuccess(photoFile, PickType.CAMERA)
+                    callback.onSuccess(photoFile, PickType.Camera)
                 } catch (e: Exception) {
-                    callback.onFailure(e, PickType.CAMERA)
+                    callback.onFailure(e, PickType.Camera)
                 }
             }
-            Activity.RESULT_CANCELED -> callback.onCancel(PickType.CAMERA)
+            Activity.RESULT_CANCELED -> callback.onCancel(PickType.Camera)
         }
     }
 
@@ -111,14 +125,12 @@ class ImagePicker(
         }
     }
 
-    private fun getNewTempFile(context: Context): File {
+    private fun getNewTempFile(): File {
         return File("${context.cacheDir}/${UUID.randomUUID()}")
     }
 
     private fun getNewPhotoFile(): File {
-        val timestamp: String = dateTimeFormatter.format(Date())
-        val uuid: String = UUID.randomUUID().toString()
-        return File("${destinationFolder.absolutePath}/${timestamp}_$uuid.jpg")
+        return File("${destinationPath}/${UUID.randomUUID()}.jpg")
     }
 
     interface Callback {
@@ -131,8 +143,9 @@ class ImagePicker(
 
 }
 
-enum class PickType {
-    CAMERA, GALLERY
+sealed class PickType {
+    object Gallery : PickType()
+    object Camera : PickType()
 }
 
 class ImagePickerFileProvider : FileProvider()

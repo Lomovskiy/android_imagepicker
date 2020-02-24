@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ImagePicker.Call
                 imagePicker.pickFromGallery(this)
             }
             R.id.pick_from_camera_button -> {
-
+                imagePicker.pickFromCamera(this)
             }
         }
     }
@@ -47,21 +47,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ImagePicker.Call
     }
 
     override fun onCancel(pickType: PickType) {
-        showToast("onCancel ${pickType.name}")
+        showToast("onCancel ${pickType}")
     }
 
     override fun onFailure(e: Exception, pickType: PickType) {
-        showToast("onFailure: $e, ${pickType.name}")
+        showToast("onFailure: $e, ${pickType}")
     }
 
     override fun onSuccess(file: File, pickType: PickType) {
         when (pickType) {
-            PickType.GALLERY -> {
-                showToast("onSuccess: ${pickType.name}")
+            PickType.Gallery -> {
+                showToast("onSuccess: ${pickType}")
                 imageView.setImageURI(Uri.fromFile(file))
             }
-            PickType.CAMERA -> {
-                showToast("onSuccess: ${pickType.name}")
+            PickType.Camera -> {
+                showToast("onSuccess: ${pickType}")
                 imageView.setImageURI(Uri.fromFile(file))
             }
         }
