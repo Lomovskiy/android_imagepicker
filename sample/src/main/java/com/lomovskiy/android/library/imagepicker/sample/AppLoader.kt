@@ -1,10 +1,10 @@
-package com.lomovskiy.imagepicker.sample
+package com.lomovskiy.android.library.imagepicker.sample
 
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Environment
-import com.lomovskiy.imagepicker.ImageCompressor
-import com.lomovskiy.imagepicker.ImagePicker
+import com.lomovskiy.android.library.imagepicker.ImageCompressor
+import com.lomovskiy.android.library.imagepicker.ImagePicker
 import java.io.File
 
 class AppLoader : Application() {
@@ -20,7 +20,12 @@ class AppLoader : Application() {
         imagePicker = ImagePicker(
             context = this,
             destinationPath = getDestinationFolderForImagePicker().absolutePath,
-            compressor = ImageCompressor(640, 480, 50, Bitmap.CompressFormat.JPEG)
+            compressor = ImageCompressor(
+                640,
+                480,
+                50,
+                Bitmap.CompressFormat.JPEG
+            )
         )
     }
 

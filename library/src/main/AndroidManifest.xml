@@ -1,10 +1,11 @@
-<manifest package="com.lomovskiy.imagepicker"
+<manifest
+        package="com.lomovskiy.android.library.imagepicker"
     xmlns:android="http://schemas.android.com/apk/res/android">
     
     <application>
 
         <provider
-            android:name=".ImagePickerFileProvider"
+            android:name="com.lomovskiy.android.library.imagepicker.ImagePickerFileProvider"
             android:authorities="${applicationId}.imagepicker.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">

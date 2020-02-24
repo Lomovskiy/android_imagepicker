@@ -1,4 +1,4 @@
-package com.lomovskiy.imagepicker
+package com.lomovskiy.android.library.imagepicker
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

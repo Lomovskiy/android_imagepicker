@@ -1,10 +1,11 @@
+apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-
 
     defaultConfig {
         minSdkVersion 16
@@ -35,4 +36,17 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
     implementation "androidx.exifinterface:exifinterface:1.1.0"
+}
+
+publish {
+
+    userOrg = "lomovskiy"
+    repoName = "android_libs"
+    groupId = "com.lomovskiy.android.library"
+    artifactId = 'image-picker'
+    publishVersion = '0.1'
+    desc = 'Description'
+    website = 'https://github.com/Lomovskiy/android_imagepicker'
+    website = "{github_url}"
+
 }

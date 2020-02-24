@@ -1,4 +1,4 @@
-package com.lomovskiy.imagepicker
+package com.lomovskiy.android.library.imagepicker
 
 import android.app.Activity
 import android.content.Context
@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import java.io.File
-import java.lang.UnsupportedOperationException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -65,8 +64,8 @@ class ImagePicker(
     fun handleOnActivityResult(requestCode: Int,
                                resultCode: Int,
                                data: Intent?,
-                               context: Context,
-                               callback: Callback) {
+                               callback: Callback
+    ) {
         if (requestCode == rcGallery) {
             handleGalleryResult(resultCode, data, callback)
         } else if (requestCode == rcCamera) {
@@ -76,7 +75,8 @@ class ImagePicker(
 
     private fun handleGalleryResult(resultCode: Int,
                                     data: Intent?,
-                                    callback: Callback) {
+                                    callback: Callback
+    ) {
         when (resultCode) {
             Activity.RESULT_OK -> {
                 try {
@@ -90,7 +90,9 @@ class ImagePicker(
                         compressor.compress(tempPhotoFile!!, photoFile)
                     }
                     tempPhotoFile!!.delete()
-                    callback.onSuccess(photoFile, PickType.Gallery)
+                    callback.onSuccess(photoFile,
+                        PickType.Gallery
+                    )
                 } catch (e: Exception) {
                     callback.onFailure(e, PickType.Gallery)
                 }
@@ -110,7 +112,9 @@ class ImagePicker(
                         compressor.compress(tempPhotoFile!!, photoFile)
                     }
                     tempPhotoFile!!.delete()
-                    callback.onSuccess(photoFile, PickType.Camera)
+                    callback.onSuccess(photoFile,
+                        PickType.Camera
+                    )
                 } catch (e: Exception) {
                     callback.onFailure(e, PickType.Camera)
                 }

@@ -1,4 +1,4 @@
-package com.lomovskiy.imagepicker.sample
+package com.lomovskiy.android.library.imagepicker.sample
 
 import android.content.Intent
 import android.net.Uri
@@ -8,8 +8,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.lomovskiy.imagepicker.ImagePicker
-import com.lomovskiy.imagepicker.PickType
+import com.lomovskiy.android.library.imagepicker.ImagePicker
+import com.lomovskiy.android.library.imagepicker.PickType
 import java.io.File
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, ImagePicker.Callback {
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ImagePicker.Call
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        imagePicker.handleOnActivityResult(requestCode, resultCode, data, this, this)
+        imagePicker.handleOnActivityResult(requestCode, resultCode, data, this)
     }
 
     override fun onCancel(pickType: PickType) {
