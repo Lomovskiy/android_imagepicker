@@ -152,4 +152,4 @@ sealed class PickType {
     object Camera : PickType()
 }
 
-class ImagePickerFileProvider : FileProvider()
+internal class ImagePickerFileProvider : FileProvider()
