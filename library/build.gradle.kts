@@ -26,7 +26,7 @@ configure<PublishExtension> {
     repoName = "android_libs"
     groupId = "com.lomovskiy.android.library"
     artifactId = "image-picker"
-    publishVersion = "1.0.0"
+    publishVersion = "1.0.1"
     desc = "Oh hi, this is a nice description for a project, right?"
     website = "https://github.com/Lomovskiy/android_imagepicker"
     dryRun = false
