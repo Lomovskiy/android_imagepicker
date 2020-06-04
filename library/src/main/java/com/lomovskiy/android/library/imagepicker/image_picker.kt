@@ -3,13 +3,17 @@ package com.lomovskiy.android.library.imagepicker
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
+class MediaFile(val uri: Uri, val file: File)
 
 class ImagePicker(
 
@@ -25,15 +29,15 @@ class ImagePicker(
 
     private val dateTimeFormatter = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
 
-    private var tempPhotoFile: File? = null
+    private var tempPhotoFile: MediaFile? = null
 
     @Throws(UnsupportedOperationException::class)
     fun pickFromCamera(fragment: Fragment) {
+        tempPhotoFile = getNewMediaFile()
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempPhotoFile!!.uri)
+        grantWritePermission(context, intent, tempPhotoFile!!.uri)
         if (intent.resolveActivity(context.packageManager) != null) {
-            tempPhotoFile = getNewTempFile()
-            val photoUri = FileProvider.getUriForFile(context, authority, tempPhotoFile!!)
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             fragment.startActivityForResult(intent, rcCamera)
         } else {
             throw UnsupportedOperationException("Activity for doing this action is not find")
@@ -42,11 +46,15 @@ class ImagePicker(
 
     @Throws(UnsupportedOperationException::class)
     fun pickFromCamera(activity: Activity) {
+        tempPhotoFile = getNewMediaFile()
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        try {
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, tempPhotoFile!!.uri)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        grantWritePermission(activity, intent, tempPhotoFile!!.uri)
         if (intent.resolveActivity(context.packageManager) != null) {
-            tempPhotoFile = getNewTempFile()
-            val photoUri = FileProvider.getUriForFile(activity, authority, tempPhotoFile!!)
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             activity.startActivityForResult(intent, rcCamera)
         } else {
             throw UnsupportedOperationException("Activity for doing this action is not find")
@@ -80,16 +88,16 @@ class ImagePicker(
         when (resultCode) {
             Activity.RESULT_OK -> {
                 try {
-                    tempPhotoFile = getNewTempFile()
+                    tempPhotoFile = getNewMediaFile()
                     val uri: Uri = data!!.data!!
-                    tempPhotoFile!!.writeBytes(context.contentResolver.openInputStream(uri)!!.readBytes())
+                    tempPhotoFile!!.file.writeBytes(context.contentResolver.openInputStream(uri)!!.readBytes())
                     val photoFile: File = getNewPhotoFile()
                     if (compressor == null) {
-                        photoFile.writeBytes(tempPhotoFile!!.readBytes())
+                        photoFile.writeBytes(tempPhotoFile!!.file.readBytes())
                     } else {
-                        compressor.compress(tempPhotoFile!!, photoFile)
+                        compressor.compress(tempPhotoFile!!.file, photoFile)
                     }
-                    tempPhotoFile!!.delete()
+                    tempPhotoFile!!.file.delete()
                     callback.onSuccess(photoFile,
                         PickType.Gallery
                     )
@@ -105,13 +113,16 @@ class ImagePicker(
         when (resultCode) {
             Activity.RESULT_OK -> {
                 try {
+                    if (tempPhotoFile!!.uri.toString().isEmpty()) {
+                        revokeWritePermission(context, tempPhotoFile!!.uri)
+                    }
                     val photoFile: File = getNewPhotoFile()
                     if (compressor == null) {
-                        photoFile.writeBytes(tempPhotoFile!!.readBytes())
+                        photoFile.writeBytes(tempPhotoFile!!.file.readBytes())
                     } else {
-                        compressor.compress(tempPhotoFile!!, photoFile)
+                        compressor.compress(tempPhotoFile!!.file, photoFile)
                     }
-                    tempPhotoFile!!.delete()
+                    tempPhotoFile!!.file.delete()
                     callback.onSuccess(photoFile,
                         PickType.Camera
                     )
@@ -129,8 +140,10 @@ class ImagePicker(
         }
     }
 
-    private fun getNewTempFile(): File {
-        return File("${context.cacheDir}/${UUID.randomUUID()}")
+    private fun getNewMediaFile(): MediaFile {
+        val file = File("${context.cacheDir}/${UUID.randomUUID()}.jpg")
+        val uri: Uri = FileProvider.getUriForFile(context, authority, file)
+        return MediaFile(uri, file)
     }
 
     private fun getNewPhotoFile(): File {
@@ -143,6 +156,18 @@ class ImagePicker(
         fun onFailure(e: Exception, pickType: PickType)
         fun onSuccess(file: File, pickType: PickType)
 
+    }
+
+    private fun grantWritePermission(context: Context, intent: Intent, uri: Uri) {
+        val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            context.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+
+    private fun revokeWritePermission(context: Context, uri: Uri) {
+        context.revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
 }
