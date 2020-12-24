@@ -7,12 +7,10 @@ import androidx.exifinterface.media.ExifInterface
 import java.io.File
 
 class ImageCompressor(
-
     private val requiredWidth: Int,
     private val requiredHeight: Int,
     private val requiredQuality: Int,
     private val compressFormat: Bitmap.CompressFormat
-
 ) {
 
     fun compress(photoFile: File, destinationFile: File) {

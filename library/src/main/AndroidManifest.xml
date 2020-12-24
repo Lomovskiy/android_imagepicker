@@ -1,9 +1,14 @@
 <manifest
-        package="com.lomovskiy.android.library.imagepicker"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    
-    <application>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.lomovskiy.android.library.imagepicker"
+    >
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true"
+        />
+
+    <application>
         <provider
             android:name="com.lomovskiy.android.library.imagepicker.ImagePickerFileProvider"
             android:authorities="${applicationId}.imagepicker.fileprovider"
@@ -13,7 +18,12 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/fileprovider_paths" />
         </provider>
-        
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
     
 </manifest>
