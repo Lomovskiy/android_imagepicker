@@ -3,9 +3,11 @@ package com.lomovskiy.android.library.imagepicker.sample
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Environment
-import com.lomovskiy.android.library.imagepicker.ImageCompressor
+import androidx.core.content.ContextCompat
+import com.lomovskiy.android.library.imagepicker.Compressor
 import com.lomovskiy.android.library.imagepicker.ImagePicker
 import java.io.File
+import java.util.concurrent.Executors
 
 class AppLoader : Application() {
 
@@ -20,12 +22,14 @@ class AppLoader : Application() {
         imagePicker = ImagePicker(
             context = this,
             destinationPath = getDestinationFolderForImagePicker().absolutePath,
-            compressor = ImageCompressor(
+            compressor = Compressor(
                 640,
                 480,
                 50,
                 Bitmap.CompressFormat.JPEG
-            )
+            ),
+            workerExecutor = Executors.newSingleThreadExecutor(),
+            uiExecutor = ContextCompat.getMainExecutor(this)
         )
     }
 

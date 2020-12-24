@@ -6,7 +6,7 @@ import android.graphics.Matrix
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
 
-class ImageCompressor(
+class Compressor(
     private val requiredWidth: Int,
     private val requiredHeight: Int,
     private val requiredQuality: Int,

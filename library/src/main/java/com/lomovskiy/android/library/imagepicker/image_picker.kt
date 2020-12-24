@@ -6,24 +6,19 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executor
-import java.util.concurrent.ExecutorService
-
-class PhotoFile(val uri: Uri, val file: File)
 
 class ImagePicker(
     private val context: Context,
     private val workerExecutor: Executor,
     private val uiExecutor: Executor,
     private val destinationPath: String,
-    private val compressor: ImageCompressor?
+    private val compressor: Compressor?
 ) {
 
     private val rcGallery = ViewCompat.generateViewId()
@@ -34,24 +29,14 @@ class ImagePicker(
         type = "image/*"
     }
 
-    private val dateTimeFormatter = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-
     private var tempPhotoFile: PhotoFile? = null
 
     fun pickFromCamera(caller: Fragment) {
-        tempPhotoFile = getNewMediaFile()
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempPhotoFile!!.uri)
-        grantWritePermission(context, intent, tempPhotoFile!!.uri)
-        caller.startActivityForResult(intent, rcCamera)
+        caller.startActivityForResult(prepareCameraIntent(), rcCamera)
     }
 
     fun pickFromCamera(caller: Activity) {
-        tempPhotoFile = getNewMediaFile()
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempPhotoFile!!.uri)
-        grantWritePermission(caller, intent, tempPhotoFile!!.uri)
-        caller.startActivityForResult(intent, rcCamera)
+        caller.startActivityForResult(prepareCameraIntent(), rcCamera)
     }
 
     fun pickFromGallery(caller: Fragment) {
@@ -93,7 +78,7 @@ class ImagePicker(
                         }
                     } catch (e: Exception) {
                         uiExecutor.execute {
-                            resultTarget.onPickImageError(e, PickType.GALLERY)
+                            resultTarget.onPickImageFailure(e, PickType.GALLERY)
                         }
                     }
                 }
@@ -125,7 +110,7 @@ class ImagePicker(
                         }
                     } catch (e: Exception) {
                         uiExecutor.execute {
-                            resultTarget.onPickImageError(e, PickType.CAMERA)
+                            resultTarget.onPickImageFailure(e, PickType.CAMERA)
                         }
                     }
                 }
@@ -144,16 +129,6 @@ class ImagePicker(
         return File("${destinationPath}/${UUID.randomUUID()}.jpg")
     }
 
-    interface ResultTarget {
-
-        fun onPickImageSuccess(file: File, pickType: PickType) {}
-
-        fun onPickImageError(e: Exception, pickType: PickType) {}
-
-        fun onPickImageCancelled(pickType: PickType) {}
-
-    }
-
     private fun grantWritePermission(context: Context, intent: Intent, uri: Uri) {
         val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
         for (resolveInfo in resInfoList) {
@@ -166,6 +141,22 @@ class ImagePicker(
         context.revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-}
+    private fun prepareCameraIntent(): Intent {
+        tempPhotoFile = getNewMediaFile()
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempPhotoFile!!.uri)
+        grantWritePermission(context, intent, tempPhotoFile!!.uri)
+        return intent
+    }
 
-internal class ImagePickerFileProvider : FileProvider()
+    interface ResultTarget {
+
+        fun onPickImageSuccess(file: File, pickType: PickType) {}
+
+        fun onPickImageFailure(e: Exception, pickType: PickType) {}
+
+        fun onPickImageCancelled(pickType: PickType) {}
+
+    }
+
+}

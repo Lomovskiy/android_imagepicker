@@ -12,7 +12,7 @@ import com.lomovskiy.android.library.imagepicker.ImagePicker
 import com.lomovskiy.android.library.imagepicker.PickType
 import java.io.File
 
-class MainActivity : AppCompatActivity(), View.OnClickListener, ImagePicker.Callback {
+class MainActivity : AppCompatActivity(), View.OnClickListener, ImagePicker.ResultTarget {
 
     private val imagePicker: ImagePicker = AppLoader.imagePicker
 
@@ -43,25 +43,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ImagePicker.Call
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        imagePicker.handleOnActivityResult(requestCode, resultCode, data, this)
+        imagePicker.handleResult(requestCode, resultCode, data, this)
     }
 
-    override fun onCancel(pickType: PickType) {
-        showToast("onCancel ${pickType}")
+    override fun onPickImageCancelled(pickType: PickType) {
+        showToast("onCancel $pickType")
     }
 
-    override fun onFailure(e: Exception, pickType: PickType) {
-        showToast("onFailure: $e, ${pickType}")
+    override fun onPickImageFailure(e: Exception, pickType: PickType) {
+        showToast("onFailure: $e, $pickType")
     }
 
-    override fun onSuccess(file: File, pickType: PickType) {
+    override fun onPickImageSuccess(file: File, pickType: PickType) {
         when (pickType) {
-            PickType.Gallery -> {
-                showToast("onSuccess: ${pickType}")
+            PickType.GALLERY -> {
+                showToast("onSuccess: $pickType")
                 imageView.setImageURI(Uri.fromFile(file))
             }
-            PickType.Camera -> {
-                showToast("onSuccess: ${pickType}")
+            PickType.CAMERA -> {
+                showToast("onSuccess: $pickType")
                 imageView.setImageURI(Uri.fromFile(file))
             }
         }
